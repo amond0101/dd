@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>음식 메뉴판</title>
+
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-p6N4XxG0nq7rzV3sLQk3YHa0OihUwKqxpMVDk3XjKq+oR3qTsAd/4kXq5YF6H6+7z5bYmZx7qt9XjWmQJb4geg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+
+  <style>
+    body {
+      font-family: 'Nanum Gothic', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    
+    .page-title {
+      background-color: #343a40;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .page-title h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    
+    .container {
+      display: flex;
+      min-height: calc(100vh - 70px);
+    }
+    
+    .sidebar {
+      width: 280px; /* 너비 증가 */
+      background: white;
+      padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .category-title {
+      font-weight: bold;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .allergy-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .allergy-item {
+      margin-bottom: 8px;
+    }
+    
+    .allergy-item.active {
+      background-color: #f8f9fa;
+      border-radius: 5px;
+    }
+    
+    .allergy-link {
+      display: block;
+      padding: 8px 15px;
+      color: #495057;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: all 0.2s;
+    }
+    
+    .allergy-link:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .main-content {
+      flex: 1;
+      padding: 20px;
+    }
+    
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .menu-item-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    .menu-item-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    
+    .menu-item {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    
+    .menu-item:hover {
+      transform: translateY(-5px);
+    }
+    
+    .menu-image {
+      height: 200px;
+      background-size: cover;
+      background-position: center;
+    }
+    
+    .menu-content {
+      padding: 15px;
+    }
+    
+    .menu-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .menu-price {
+      color: #dc3545;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    
+    .menu-description {
+      font-size: 14px;
+      color: #6c757d;
+      margin-bottom: 15px;
+      line-height: 1.4;
+    }
+    
+    .view-details {
+      text-align: center;
+      padding: 10px;
+      background: #0d6efd;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      font-size: 15px;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+    }
+    
+    /* 장바구니 버튼 스타일 */
+    .cart-button {
+      padding: 8px 15px;
+      background: #dc3545;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .cart-count {
+      background: white;
+      color: #dc3545;
+      border-radius: 50%;
+      min-width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .add-button, .change-button {
+      padding: 8px 15px;
+      background: #28a745;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    
+    .change-button {
+      background: #6c757d;
+    }
+    
+    .no-menu {
+      font-size: 18px;
+      color: #6c757d;
+      text-align: center;
+      margin-top: 50px;
+    }
+    
+    /* 알림 메시지 스타일 - 한 줄에 표시 */
+    .filter-notice-enhanced {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8d7da; /* 연한 빨간색 배경 */
+      border-radius: 5px;
+      display: flex;
+      flex-direction: row; /* 가로 배치 */
+      justify-content: space-between; /* 양쪽 정렬 */
+      align-items: center; /* 세로 중앙 정렬 */
+    }
+    
+    .filter-label {
+      font-size: 13px; /* 글자 크기 약간 줄임 */
+      font-weight: bold;
+      color: #721c24; /* 어두운 빨간색 텍스트 */
+      white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+      overflow: hidden;
+      text-overflow: ellipsis; /* 텍스트가 길면 말줄임표로 표시 */
+      flex: 1; /* 남은 공간 차지 */
+      margin-right: 15px; /* 버튼과의 간격 */
+    }
+    
+    .clear-filter-enhanced {
+      background-color: #dc3545; /* 빨간색 버튼 배경 */
+      color: white;
+      padding: 7px 15px; /* 버튼 패딩 증가 */
+      border-radius: 3px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: bold;
+      white-space: nowrap; /* 버튼 텍스트 줄바꿈 방지 */
+      flex-shrink: 0; /* 버튼 크기 고정 */
+    }
+    
+    .clear-filter-enhanced:hover {
+      background-color: #c82333; /* 더 어두운 빨간색 (호버 효과) */
+    }
+    
+    /* 장바구니 담기 버튼 */
+    .add-to-cart-btn {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 15px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 10;
+    }
+    
+    .menu-item-container:hover .add-to-cart-btn {
+      opacity: 1;
+    }
+    
+    /* 장바구니 추가 메시지 */
+    .cart-message {
+      position: absolute;
+      bottom: 15px;
+      left: 0;
+      right: 0;
+      background: rgba(40, 167, 69, 0.9);
+      color: white;
+      padding: 10px;
+      text-align: center;
+      border-radius: 0 0 10px 10px;
+      transition: opacity 0.3s;
+      opacity: 1;
+      z-index: 2;
+    }
+    
+    .view-cart-link {
+      color: white;
+      text-decoration: underline;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    
+    /* 모바일 화면에서의 스타일 조정 */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      
+      .container {
+        flex-direction: column;
+      }
+      
+      .menu-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+      }
+      
+      .add-to-cart-btn {
+        opacity: 1; /* 모바일에서 항상 보이게 */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-title">
+    <h1><i class="fa-solid fa-desktop"></i> 음식 메뉴판</h1>
+    <div class="button-group">
+      <a href="/cart" class="cart-button">
+        <i class="fa-solid fa-cart-shopping"></i> 장바구니
+        <span class="cart-count" id="cart-count">0</span>
+      </a>
+      <a href="/add" class="add-button">+ 음식 추가</a>
+      <a href="/change-password" class="change-button">비밀번호 변경</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar">
+      <div class="category-title">알레르기 카테고리</div>
+      <ul class="allergy-list">
+        {% for allergy in allergies %}
+          <li class="allergy-item{% if selected_allergy==allergy %} active{% endif %}">
+            <a href="/?allergy={{ allergy }}" class="allergy-link">{{ allergy }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+      {% if selected_allergy %}
+        <div class="filter-notice-enhanced">
+          <span class="filter-label">"{{ selected_allergy }}" 제외</span>
+          <a href="/" class="clear-filter-enhanced">초기화</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="main-content">
+      {% if menu_items %}
+        <div class="menu-grid">
+          {% for item in menu_items %}
+            <div class="menu-item-container">
+              <a href="{{ url_for('menu_detail',menu_id=item.id) }}" class="menu-item-link">
+                <div class="menu-item">
+                  <div class="menu-image" style="background-image:url('{{item.image_url}}')"></div>
+                  <div class="menu-content">
+                    <div class="menu-name">{{item.name}}</div>
+                    <div class="menu-price">{{item.price}}원</div>
+                    <div class="menu-description">{{item.description}}</div>
+                    <div class="view-details">상세정보 보기</div>
+                  </div>
+                </div>
+              </a>
+              <button class="add-to-cart-btn" onclick="addToCart({{item.id}})">
+                <i class="fa-solid fa-cart-plus"></i> 담기
+              </button>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="no-menu">"{{ selected_allergy }}"가 없는 메뉴가 없습니다.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 외부 JavaScript 파일 사용 -->
+  <script src="/static/js/index.js"></script>
+</body>
+</html>

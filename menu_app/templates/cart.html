@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>장바구니 - 음식 메뉴판</title>
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-p6N4XxG0nq7rzV3sLQk3YHa0OihUwKqxpMVDk3XjKq+oR3qTsAd/4kXq5YF6H6+7z5bYmZx7qt9XjWmQJb4geg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    body {font-family:'Nanum Gothic',Arial,sans-serif; margin:0; padding:0; background:#f5f5f5;}
+    .page-title {background-color:#343a40; color:white; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center;}
+    .page-title h1 {margin:0; font-size:1.8rem;}
+    .container {max-width:1000px; margin:20px auto; background:white; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.1); padding:20px;}
+    .cart-empty {text-align:center; padding:50px 0; color:#6c757d;}
+    .cart-table {width:100%; border-collapse:collapse;}
+    .cart-table th {padding:15px; text-align:left; border-bottom:1px solid #dee2e6; color:#495057;}
+    .cart-table td {padding:15px; border-bottom:1px solid #dee2e6;}
+    .cart-image {width:80px; height:80px; object-fit:cover; border-radius:5px;}
+    .cart-item-name {font-weight:bold; color:#343a40;}
+    .cart-quantity {display:flex; align-items:center;}
+    .quantity-btn {background:#f8f9fa; border:1px solid #dee2e6; width:30px; height:30px; font-size:16px; cursor:pointer;}
+    .quantity-input {width:40px; text-align:center; margin:0 5px; border:1px solid #dee2e6; padding:5px;}
+    .cart-price {font-weight:bold; color:#dc3545;}
+    .cart-footer {display:flex; justify-content:space-between; align-items:center; margin-top:20px; padding-top:20px; border-top:1px solid #dee2e6;}
+    .cart-total {font-size:18px; font-weight:bold;}
+    .cart-buttons {display:flex; gap:10px;}
+    .btn {padding:10px 20px; border-radius:5px; font-weight:bold; cursor:pointer; text-decoration:none; display:inline-block;}
+    .btn-primary {background:#0d6efd; color:white; border:none;}
+    .btn-secondary {background:#6c757d; color:white; border:none;}
+    .btn-danger {background:#dc3545; color:white; border:none;}
+    .allergy-item {background:#f8d7da; color:#721c24; padding:5px 10px; border-radius:20px; margin-right:5px; display:inline-block; font-size:12px;}
+    
+    /* 모바일 화면에서의 스타일 조정 */
+    @media (max-width: 768px) {
+      .cart-table th:nth-child(1),
+      .cart-table td:nth-child(1) {
+        display: none; /* 모바일에서 이미지 열 숨김 */
+      }
+      
+      .cart-buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-title">
+    <h1><i class="fa-solid fa-cart-shopping"></i> 장바구니</h1>
+    <a href="/" class="btn btn-secondary">메인으로 돌아가기</a>
+  </div>
+
+  <div class="container">
+    {% if cart %}
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>이미지</th>
+            <th>상품명</th>
+            <th>알러지 정보</th>
+            <th>수량</th>
+            <th>가격</th>
+            <th>합계</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in cart %}
+            <tr class="cart-item" data-id="{{ item.id }}" data-price="{{ item.price }}">
+              <td><img src="{{ item.image_url }}" class="cart-image"></td>
+              <td class="cart-item-name">{{ item.name }}</td>
+              <td>
+                {% if item.allergies %}
+                  {% for allergy in item.allergies %}
+                    <span class="allergy-item">{{ allergy }}</span>
+                  {% endfor %}
+                {% else %}
+                  <span>없음</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="cart-quantity">
+                  <button class="quantity-btn decrease-btn" onclick="updateQuantity({{ item.id }}, -1)">-</button>
+                  <input type="number" class="quantity-input" value="{{ item.quantity }}" min="1" onchange="updateQuantityDirect({{ item.id }}, this.value)">
+                  <button class="quantity-btn increase-btn" onclick="updateQuantity({{ item.id }}, 1)">+</button>
+                </div>
+              </td>
+              <td class="cart-price">{{ item.price }}원</td>
+              <td class="cart-subtotal">{{ item.price * item.quantity }}원</td>
+              <td>
+                <button class="btn btn-danger" onclick="removeItem({{ item.id }})">삭제</button>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      
+      <div class="cart-footer">
+        <div class="cart-total">총 합계: <span id="total-price">{{ total_price }}</span>원</div>
+        <div class="cart-buttons">
+          <button class="btn btn-danger" onclick="clearCart()">장바구니 비우기</button>
+          <a href="/cart/checkout" class="btn btn-primary">주문하기</a>
+        </div>
+      </div>
+    {% else %}
+      <div class="cart-empty">
+        <i class="fa-solid fa-cart-shopping fa-4x" style="color:#dee2e6;margin-bottom:20px;"></i>
+        <h2>장바구니가 비어있습니다.</h2>
+        <p>메뉴를 선택하여 장바구니에 추가해주세요.</p>
+        <a href="/" class="btn btn-primary">메뉴 둘러보기</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- 외부 JavaScript 파일 사용 -->
+  <script src="/static/js/cart.js"></script>
+</body>
+</html>

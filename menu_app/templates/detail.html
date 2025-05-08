@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ menu_item.name }} - 상세정보</title>
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-p6N4XxG0nq7rzV3sLQk3YHa0OihUwKqxpMVDk3XjKq+oR3qTsAd/4kXq5YF6H6+7z5bYmZx7qt9XjWmQJb4geg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    body {font-family:'Nanum Gothic',Arial,sans-serif; margin:0; padding:20px; background:#f8f9fa;}
+    .container {max-width:800px; margin:0 auto; background:white; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); overflow:hidden;}
+    .menu-image {height:300px; background-position:center; background-size:cover;}
+    .menu-content {padding:30px;}
+    .menu-name {font-size:28px; font-weight:bold; color:#343a40; margin-bottom:10px;}
+    .menu-price {font-size:20px; font-weight:bold; color:#dc3545; margin-bottom:20px;}
+    .menu-description {font-size:16px; color:#495057; line-height:1.6;}
+    .allergy-section {margin-top:30px; border-top:1px solid #e9ecef; padding-top:20px;}
+    .allergy-title {font-size:20px; font-weight:bold; color:#343a40; margin-bottom:15px;}
+    .allergy-list {display:flex; flex-wrap:wrap; gap:10px;}
+    .allergy-item {background:#f8d7da; color:#721c24; padding:8px 15px; border-radius:20px;}
+    .back-button {display:inline-block; background:#6c757d; color:white; text-decoration:none; padding:12px 25px; border-radius:5px; margin-top:20px;}
+    .back-button:hover {background:#5a6268;}
+    
+    /* 장바구니 관련 스타일 */
+    .cart-section {
+      margin: 25px 0;
+      padding: 20px 0;
+      border-top: 1px solid #e9ecef;
+    }
+    
+    .quantity-control {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .quantity-control span {
+      margin-right: 10px;
+      font-weight: bold;
+      color: #343a40;
+    }
+    
+    .quantity-btn {
+      width: 35px;
+      height: 35px;
+      border: 1px solid #ced4da;
+      background: #f8f9fa;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      outline: none;
+    }
+    
+    .quantity-btn.decrease {
+      border-radius: 5px 0 0 5px;
+    }
+    
+    .quantity-btn.increase {
+      border-radius: 0 5px 5px 0;
+    }
+    
+    #quantity {
+      width: 50px;
+      height: 35px;
+      border: 1px solid #ced4da;
+      border-left: none;
+      border-right: none;
+      text-align: center;
+      -moz-appearance: textfield;
+    }
+    
+    #quantity::-webkit-outer-spin-button,
+    #quantity::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    .add-to-cart-btn {
+      width: 100%;
+      padding: 12px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.3s;
+    }
+    
+    .add-to-cart-btn:hover {
+      background: #c82333;
+    }
+    
+    /* 추가된 메시지 스타일 */
+    .cart-message {
+      background: #28a745;
+      color: white;
+      padding: 15px;
+      border-radius: 5px;
+      text-align: center;
+      margin-top: 15px;
+      display: none;
+    }
+    
+    .view-cart-link {
+      color: white;
+      text-decoration: underline;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="menu-image" style="background-image:url('{{menu_item.image_url}}')"></div>
+    <div class="menu-content">
+      <div class="menu-name">{{menu_item.name}}</div>
+      <div class="menu-price">{{menu_item.price}}원</div>
+      <div class="menu-description">{{menu_item.description}}</div>
+      <div class="allergy-section">
+        <div class="allergy-title">알레르기 정보</div>
+        <div class="allergy-list">
+          {% if menu_item.allergies %}
+            {% for a in menu_item.allergies %}
+              <div class="allergy-item">{{a}}</div>
+            {% endfor %}
+          {% else %}
+            <p>알레르기 유발 성분이 없습니다.</p>
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- 수량 및 장바구니 기능 추가 -->
+      <div class="cart-section">
+        <div class="quantity-control">
+          <span>수량:</span>
+          <button class="quantity-btn decrease" onclick="changeQuantity(-1)">-</button>
+          <input type="number" id="quantity" value="1" min="1" max="10" onchange="validateQuantity()">
+          <button class="quantity-btn increase" onclick="changeQuantity(1)">+</button>
+        </div>
+        <button class="add-to-cart-btn" onclick="addToCart({{menu_item.id}})">
+          <i class="fa-solid fa-cart-plus"></i> 장바구니에 담기
+        </button>
+        
+        <!-- 성공 메시지는 JavaScript로 추가됨 -->
+      </div>
+      
+      <a href="{{url_for('index')}}" class="back-button">뒤로 가기</a>
+    </div>
+  </div>
+
+  <!-- 외부 JavaScript 파일 사용 -->
+  <script src="/static/js/detail.js"></script>
+</body>
+</html>

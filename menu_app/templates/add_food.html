@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>음식 추가</title>
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-p6N4XxG0nq7rzV3sLQk3YHa0OihUwKqxpMVDk3XjKq+oR3qTsAd/4kXq5YF6H6+7z5bYmZx7qt9XjWmQJb4geg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    body {font-family:'Nanum Gothic',Arial,sans-serif; background:#f8f9fa; margin:0; padding:30px;}
+    .container {max-width:600px; margin:0 auto; background:white; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); padding:30px;}
+    h2 {text-align:center; color:#343a40; margin-bottom:30px;}
+    .message {color:red; margin-bottom:20px;}
+    
+    /* 고급스러운 알러지 선택 버튼 스타일 */
+    .allergy-selection {
+      margin-bottom: 25px;
+    }
+    
+    .allergy-selection-label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+      color: #495057;
+    }
+    
+    .allergy-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+    
+    .allergy-button {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .allergy-button input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .allergy-button label {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #f8f9fa;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      color: #495057;
+      font-weight: normal;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .allergy-button input[type="checkbox"]:checked + label {
+      background-color: #dc3545;
+      border-color: #dc3545;
+      color: white;
+    }
+    
+    .allergy-button label:hover {
+      background-color: #e9ecef;
+    }
+    
+    .allergy-button input[type="checkbox"]:checked + label:hover {
+      background-color: #c82333;
+    }
+    
+    .allergy-help {
+      font-size: 12px;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #495057;
+    }
+    
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+    }
+    
+    .password-group {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .submit-button {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+    }
+    
+    .submit-button:hover {
+      background: #218838;
+    }
+    
+    /* 멋진 파일 업로드 버튼 */
+    .file-upload {
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .file-upload input[type="file"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    
+    .file-upload-btn {
+      display: inline-block;
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .file-name {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #6c757d;
+    }
+    
+    /* 모바일 화면에서의 스타일 조정 */
+    @media (max-width: 768px) {
+      .allergy-buttons {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .allergy-button label {
+        display: block;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>음식 추가</h2>
+    {% with messages=get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat,msg in messages %}
+          <div class="message">{{msg}}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="post" enctype="multipart/form-data">
+      <div class="password-group">
+        <label>관리자 비밀번호</label>
+        <input type="password" name="admin_password" required>
+      </div>
+      
+      <div class="form-group">
+        <label>음식 이름</label>
+        <input type="text" name="name" required placeholder="예: 불고기 비빔밥">
+      </div>
+      
+      <div class="form-group">
+        <label>가격 (원)</label>
+        <input type="number" name="price" required placeholder="예: 9000">
+      </div>
+      
+      <div class="form-group">
+        <label>설명</label>
+        <textarea name="description" rows="3" required placeholder="음식에 대한 간단한 설명을 작성하세요."></textarea>
+      </div>
+      
+      <div class="allergy-selection">
+        <span class="allergy-selection-label">알러지 정보</span>
+        <div class="allergy-buttons">
+          {% for a in allergies %}
+            <div class="allergy-button">
+              <input type="checkbox" id="allergy-{{ loop.index }}" name="allergies" value="{{a}}">
+              <label for="allergy-{{ loop.index }}">{{a}}</label>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="allergy-help">
+          <i class="fas fa-info-circle"></i> 해당되는 알러지를 모두 선택하세요.
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>이미지 업로드</label>
+        <div class="file-upload">
+          <input type="file" name="image" accept="image/*" id="image-upload" onchange="updateFileName()">
+          <div class="file-upload-btn">
+            <i class="fas fa-upload"></i> 이미지 파일 선택
+          </div>
+          <div class="file-name" id="file-name">선택된 파일 없음</div>
+        </div>
+      </div>
+      
+      <button type="submit" class="submit-button">음식 추가하기</button>
+    </form>
+  </div>
+  
+  <script>
+    // 파일 이름 표시 업데이트
+    function updateFileName() {
+      const input = document.getElementById('image-upload');
+      const fileNameDisplay = document.getElementById('file-name');
+      
+      if (input.files && input.files[0]) {
+        fileNameDisplay.textContent = input.files[0].name;
+      } else {
+        fileNameDisplay.textContent = '선택된 파일 없음';
+      }
+    }
+  </script>
+</body>
+</html> 
